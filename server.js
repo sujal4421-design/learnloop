@@ -23,11 +23,11 @@ app.use(express.static(path.join(__dirname, 'public'))); // serve CSS/JS/images
 app.use(sessionMiddleware);
 
 // ---- Routes ----
+app.use('/auth', require('./src/routes/authRoutes'));
+app.use('/dashboard', require('./src/routes/dashboardRoutes'));
 // Route files will be added here as they're built:
-// app.use('/auth', require('./src/routes/authRoutes'));
 // app.use('/logs', require('./src/routes/logRoutes'));
 // app.use('/revisions', require('./src/routes/revisionRoutes'));
-// app.use('/dashboard', require('./src/routes/dashboardRoutes'));
 
 // Temporary health-check route — confirms the server + DB are alive.
 app.get('/health', async (req, res) => {
