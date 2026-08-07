@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Logs — LearnLoop</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/nav') %>
+
+  <div style="max-width: 760px; margin: 40px auto; padding: 0 24px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+      <h1 style="margin:0; font-size:22px;">My Learning Logs</h1>
+      <a href="/logs/new" style="background:var(--color-primary); color:white; padding:9px 16px; border-radius:var(--radius); text-decoration:none; font-size:14px; font-weight:600;">+ Add Log</a>
+    </div>
+
+    <% if (logs.length === 0) { %>
+      <div style="text-align:center; padding:60px 20px; color:var(--color-text-muted);">
+        <p>You haven't logged anything yet.</p>
+        <a href="/logs/new" style="color:var(--color-primary); font-weight:600;">Log your first topic →</a>
+      </div>
+    <% } else { %>
+      <% logs.forEach(log => { %>
+        <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius); padding:16px 20px; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <span style="display:inline-block; background:#EEF3F0; color:var(--color-primary); font-size:12px; font-weight:600; padding:2px 8px; border-radius:4px; margin-bottom:6px;">
+                <%= log.category %>
+              </span>
+              <h3 style="margin:4px 0 6px; font-size:16px;"><%= log.title %></h3>
+              <p style="margin:0; color:var(--color-text-muted); font-size:14px;"><%= log.description %></p>
+              <p style="margin:8px 0 0; color:var(--color-text-muted); font-size:12px;">
+                Logged on <%= new Date(log.date_learned).toLocaleDateString() %>
+              </p>
+            </div>
+            <div style="display:flex; gap:8px; flex-shrink:0; margin-left:16px;">
+              <a href="/logs/<%= log.id %>/edit" style="font-size:13px; color:var(--color-primary); text-decoration:none;">Edit</a>
+              <form action="/logs/<%= log.id %>/delete" method="POST" onsubmit="return confirm('Delete this log? This cannot be undone.');" style="margin:0;">
+                <button type="submit" style="width:auto; padding:0; background:none; color:var(--color-error); border:none; font-size:13px; font-weight:600; cursor:pointer;">Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</body>
+</html>
