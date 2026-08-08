@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Today's Revisions — LearnLoop</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/nav') %>
+
+  <div style="max-width: 760px; margin: 40px auto; padding: 0 24px;">
+    <h1 style="font-size:22px; margin-bottom:6px;">What to revise today</h1>
+    <p style="color:var(--color-text-muted); font-size:14px; margin-bottom:24px;">
+      Includes anything due today or overdue.
+    </p>
+
+    <% if (dueRevisions.length === 0) { %>
+      <div style="text-align:center; padding:60px 20px; color:var(--color-text-muted);">
+        <p>Nothing due today — you're all caught up. 🎉</p>
+        <a href="/logs" style="color:var(--color-primary); font-weight:600;">View my logs →</a>
+      </div>
+    <% } else { %>
+      <% dueRevisions.forEach(rev => { %>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius); padding:14px 20px; margin-bottom:10px;">
+          <div>
+            <span style="display:inline-block; background:#EEF3F0; color:var(--color-primary); font-size:12px; font-weight:600; padding:2px 8px; border-radius:4px; margin-bottom:6px;">
+              <%= rev.category %>
+            </span>
+            <h3 style="margin:4px 0 2px; font-size:15px;"><%= rev.title %></h3>
+            <p style="margin:0; color:var(--color-text-muted); font-size:12px;">
+              Scheduled for <%= new Date(rev.scheduled_date).toLocaleDateString() %>
+            </p>
+          </div>
+          <form action="/revisions/<%= rev.id %>/complete" method="POST" style="margin:0;">
+            <button type="submit" style="width:auto; padding:8px 16px; font-size:13px;">Mark revised</button>
+          </form>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</body>
+</html>

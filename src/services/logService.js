@@ -3,6 +3,7 @@
 // view/edit/delete their OWN logs, verified here before the Model is touched.
 
 const LogModel = require('../models/logModel');
+const RevisionService = require('./revisionService');
 
 function assertOwnership(log, userId) {
   if (!log) {
@@ -30,11 +31,15 @@ const LogService = {
 
     const logId = await LogModel.create({ userId, title, description, category });
 
-    // NOTE: automatic revision scheduling (Day 1/3/7/14/30) and the Groq AI
-    // summary both hook in right here, in upcoming phases — this is the
-    // exact point in the flow where they'll be triggered.
+    const newLog = await LogModel.findById(logId);
 
-    return LogModel.findById(logId);
+    // Automatically schedule the 5 spaced revisions (Day 1/3/7/14/30)
+    // based on this log's date_learned.
+    await RevisionService.scheduleForLog(logId, newLog.date_learned);
+
+    // NOTE: the Groq AI summary hooks in right here too, in an upcoming phase.
+
+    return newLog;
   },
 
   async getUserLogs(userId) {

@@ -26,8 +26,7 @@ app.use(sessionMiddleware);
 app.use('/auth', require('./src/routes/authRoutes'));
 app.use('/dashboard', require('./src/routes/dashboardRoutes'));
 app.use('/logs', require('./src/routes/logRoutes'));
-// Route files will be added here as they're built:
-// app.use('/revisions', require('./src/routes/revisionRoutes'));
+app.use('/revisions', require('./src/routes/revisionRoutes'));
 
 // Temporary health-check route — confirms the server + DB are alive.
 app.get('/health', async (req, res) => {
