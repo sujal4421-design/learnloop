@@ -36,6 +36,26 @@ const LogModel = {
   async delete(id) {
     // revisions for this log are removed automatically — ON DELETE CASCADE (schema.sql)
     await pool.query('DELETE FROM logs WHERE id = ?', [id]);
+  },
+
+  async countTotalForUser(userId) {
+    const [rows] = await pool.query(
+      'SELECT COUNT(*) AS total FROM logs WHERE user_id = ?',
+      [userId]
+    );
+    return rows[0].total;
+  },
+
+  async countByCategoryForUser(userId) {
+    const [rows] = await pool.query(
+      `SELECT category, COUNT(*) AS count
+       FROM logs
+       WHERE user_id = ?
+       GROUP BY category
+       ORDER BY count DESC`,
+      [userId]
+    );
+    return rows;
   }
 };
 
