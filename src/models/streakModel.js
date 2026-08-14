@@ -19,6 +19,15 @@ const StreakModel = {
       [userId]
     );
     return rows[0] || null;
+  },
+
+  async update(userId, { currentStreak, longestStreak, lastLoggedDate }) {
+    await pool.query(
+      `UPDATE streaks
+       SET current_streak = ?, longest_streak = ?, last_logged_date = ?
+       WHERE user_id = ?`,
+      [currentStreak, longestStreak, lastLoggedDate, userId]
+    );
   }
 };
 

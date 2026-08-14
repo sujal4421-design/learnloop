@@ -14,7 +14,14 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  // Return DATE columns as plain 'YYYY-MM-DD' strings instead of JS Date
+  // objects. Without this, mysql2 wraps DATE values in a Date object
+  // anchored to the server's local timezone, and later converting that
+  // through toISOString() (which is UTC) can silently shift the date by
+  // a day for timezones ahead of UTC. Plain strings sidestep the whole
+  // problem — there's no timezone to misinterpret.
+  dateStrings: ['DATE']
 });
 
 module.exports = pool;

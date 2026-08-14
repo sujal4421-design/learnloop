@@ -4,10 +4,11 @@ const RevisionModel = require('../models/revisionModel');
 
 const INTERVALS_IN_DAYS = [1, 3, 7, 14, 30];
 
-function addDays(baseDate, days) {
-  const d = new Date(baseDate);
-  d.setDate(d.getDate() + days);
-  // Format as YYYY-MM-DD for MySQL's DATE type.
+function addDays(baseDateStr, days) {
+  // Anchor to UTC midnight explicitly — avoids any local-timezone shift
+  // when the date is later formatted back into a string.
+  const d = new Date(`${baseDateStr}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().split('T')[0];
 }
 

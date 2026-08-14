@@ -4,6 +4,7 @@
 
 const LogModel = require('../models/logModel');
 const RevisionService = require('./revisionService');
+const StreakService = require('./streakService');
 
 function assertOwnership(log, userId) {
   if (!log) {
@@ -36,6 +37,9 @@ const LogService = {
     // Automatically schedule the 5 spaced revisions (Day 1/3/7/14/30)
     // based on this log's date_learned.
     await RevisionService.scheduleForLog(logId, newLog.date_learned);
+
+    // Update the user's daily logging streak.
+    await StreakService.recordActivity(userId);
 
     // NOTE: the Groq AI summary hooks in right here too, in an upcoming phase.
 
