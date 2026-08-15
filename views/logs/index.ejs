@@ -30,6 +30,11 @@
               </span>
               <h3 style="margin:4px 0 6px; font-size:16px;"><%= log.title %></h3>
               <p style="margin:0; color:var(--color-text-muted); font-size:14px;"><%= log.description %></p>
+              <% if (log.ai_summary) { %>
+                <p style="margin:8px 0 0; font-size:13px; color:var(--color-primary); display:flex; align-items:flex-start; gap:6px;">
+                  <span>✨</span><span><%= log.ai_summary %></span>
+                </p>
+              <% } %>
               <p style="margin:8px 0 0; color:var(--color-text-muted); font-size:12px;">
                 Logged on <%= new Date(log.date_learned).toLocaleDateString() %>
               </p>

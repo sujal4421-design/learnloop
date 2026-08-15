@@ -33,6 +33,13 @@ const LogModel = {
     );
   },
 
+  async updateAiSummary(id, aiSummary) {
+    await pool.query(
+      'UPDATE logs SET ai_summary = ? WHERE id = ?',
+      [aiSummary, id]
+    );
+  },
+
   async delete(id) {
     // revisions for this log are removed automatically — ON DELETE CASCADE (schema.sql)
     await pool.query('DELETE FROM logs WHERE id = ?', [id]);

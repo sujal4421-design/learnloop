@@ -5,6 +5,7 @@
 const LogModel = require('../models/logModel');
 const RevisionService = require('./revisionService');
 const StreakService = require('./streakService');
+const AIService = require('./aiService');
 
 function assertOwnership(log, userId) {
   if (!log) {
@@ -41,7 +42,12 @@ const LogService = {
     // Update the user's daily logging streak.
     await StreakService.recordActivity(userId);
 
-    // NOTE: the Groq AI summary hooks in right here too, in an upcoming phase.
+    // Generate a one-line AI summary (best-effort — never blocks log creation).
+    const aiSummary = await AIService.generateSummary(title, description);
+    if (aiSummary) {
+      await LogModel.updateAiSummary(logId, aiSummary);
+      newLog.ai_summary = aiSummary;
+    }
 
     return newLog;
   },
