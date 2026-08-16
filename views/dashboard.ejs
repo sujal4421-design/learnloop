@@ -15,6 +15,15 @@
       Here's where your learning stands today.
     </p>
 
+    <% if (summary.dueTodayCount > 0) { %>
+      <div style="background:#FFF8E6; border:1px solid #F0DFA0; border-radius:var(--radius); padding:14px 18px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:14px;">
+          📌 You have <strong><%= summary.dueTodayCount %></strong> topic<%= summary.dueTodayCount > 1 ? 's' : '' %> to revise today.
+        </span>
+        <a href="/revisions" style="color:var(--color-primary); font-weight:600; font-size:14px; text-decoration:none; white-space:nowrap; margin-left:16px;">Revise now →</a>
+      </div>
+    <% } %>
+
     <!-- Stat cards -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:14px; margin-bottom:28px;">
 

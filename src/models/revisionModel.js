@@ -46,7 +46,7 @@ const RevisionModel = {
     );
   },
 
-  // Used by the dashboard later: counts of revised vs pending for a user.
+  // Used by the dashboard: counts of revised vs pending for a user.
   async countByStatusForUser(userId) {
     const [rows] = await pool.query(
       `SELECT r.status, COUNT(*) AS count
@@ -57,6 +57,37 @@ const RevisionModel = {
       [userId]
     );
     return rows;
+  },
+
+  // Used by the daily cron job — need every user who has something due,
+  // not just one specific user's revisions.
+  async findAllDueGroupedByUser() {
+    const [rows] = await pool.query(
+      `SELECT r.id, r.scheduled_date, l.title, l.category, u.id AS user_id, u.name, u.email
+       FROM revisions r
+       JOIN logs l ON r.log_id = l.id
+       JOIN users u ON l.user_id = u.id
+       WHERE r.status = 'pending' AND r.scheduled_date <= CURDATE()
+       ORDER BY u.id`
+    );
+
+    // Group the flat rows into { userId: { user: {...}, revisions: [...] } }
+    const grouped = {};
+    for (const row of rows) {
+      if (!grouped[row.user_id]) {
+        grouped[row.user_id] = {
+          user: { id: row.user_id, name: row.name, email: row.email },
+          revisions: []
+        };
+      }
+      grouped[row.user_id].revisions.push({
+        id: row.id,
+        title: row.title,
+        category: row.category,
+        scheduled_date: row.scheduled_date
+      });
+    }
+    return Object.values(grouped);
   }
 };
 

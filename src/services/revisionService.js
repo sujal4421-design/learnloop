@@ -44,6 +44,10 @@ const RevisionService = {
     const counts = { pending: 0, revised: 0 };
     rows.forEach(row => { counts[row.status] = row.count; });
     return counts;
+  },
+
+  async getAllDueForReminders() {
+    return RevisionModel.findAllDueGroupedByUser();
   }
 };
 

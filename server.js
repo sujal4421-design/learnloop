@@ -8,6 +8,7 @@ const path = require('path');
 
 const pool = require('./src/config/db');
 const sessionMiddleware = require('./src/config/session');
+const { startDailyReminderJob } = require('./src/cron/dailyReminder');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -45,4 +46,6 @@ app.get('/', (req, res) => {
 // ---- Start server ----
 app.listen(PORT, () => {
   console.log(`LearnLoop server running at http://localhost:${PORT}`);
+  startDailyReminderJob();
 });
+
