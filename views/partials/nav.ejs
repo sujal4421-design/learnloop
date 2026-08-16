@@ -1,11 +1,16 @@
-<nav style="display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--color-border); background:var(--color-surface);">
-  <div style="font-weight:600;">LearnLoop</div>
-  <div style="display:flex; gap:20px; align-items:center; font-size:14px;">
-    <a href="/dashboard" style="color:var(--color-text); text-decoration:none;">Dashboard</a>
-    <a href="/logs" style="color:var(--color-text); text-decoration:none;">My Logs</a>
-    <a href="/revisions" style="color:var(--color-text); text-decoration:none;">Today's Revisions</a>
+<header class="navbar">
+  <div class="brand"><span class="brand-mark"></span>LearnLoop</div>
+  <nav style="display:flex; align-items:center;">
+    <div class="search-hint magnetic" onclick="if(window.toggleSearch) toggleSearch()" style="display:flex; align-items:center; gap:8px; padding:6px 12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:20px; cursor:pointer; margin-right: 16px;">
+      <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <span style="font-size:12px; color:var(--ink-muted);">Search</span>
+      <kbd style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 4px; border-radius:4px; font-family:monospace; color:var(--ink-muted);">Ctrl K</kbd>
+    </div>
+    <a href="/dashboard#overview" class="nav-link">Dashboard</a>
+    <a href="/dashboard#logs" class="nav-link">My Logs</a>
+    <a href="/dashboard#revisions" class="nav-link">Today's Revisions</a>
     <form action="/auth/logout" method="POST" style="margin:0;">
-      <button type="submit" style="width:auto; padding:6px 14px; font-size:13px; margin:0;">Log out</button>
+      <button type="submit" class="btn btn-ghost btn-sm magnetic">Log out</button>
     </form>
-  </div>
-</nav>
+  </nav>
+</header>

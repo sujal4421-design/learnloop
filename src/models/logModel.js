@@ -63,6 +63,18 @@ const LogModel = {
       [userId]
     );
     return rows;
+  },
+
+  async getHeatmapData(userId) {
+    const [rows] = await pool.query(
+      `SELECT DATE_FORMAT(date_learned, '%Y-%m-%d') as date, COUNT(*) as count 
+       FROM logs 
+       WHERE user_id = ? AND date_learned >= DATE_SUB(CURDATE(), INTERVAL 90 DAY) 
+       GROUP BY date 
+       ORDER BY date ASC`,
+      [userId]
+    );
+    return rows;
   }
 };
 

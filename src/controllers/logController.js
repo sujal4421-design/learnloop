@@ -6,8 +6,7 @@ const LogService = require('../services/logService');
 const LogController = {
   // GET /logs — list all of this user's logs
   async index(req, res) {
-    const logs = await LogService.getUserLogs(req.session.userId);
-    res.render('logs/index', { logs });
+    res.redirect('/dashboard#logs');
   },
 
   // GET /logs/new — show the "add log" form
@@ -24,7 +23,7 @@ const LogController = {
     const { title, description, category } = req.body;
     try {
       await LogService.createLog(req.session.userId, { title, description, category });
-      res.redirect('/logs');
+      res.redirect('/dashboard#logs');
     } catch (err) {
       res.status(err.status || 500).render('logs/form', {
         mode: 'create',
@@ -49,7 +48,7 @@ const LogController = {
     const { title, description, category } = req.body;
     try {
       await LogService.updateLog(req.params.id, req.session.userId, { title, description, category });
-      res.redirect('/logs');
+      res.redirect('/dashboard#logs');
     } catch (err) {
       res.status(err.status || 500).render('logs/form', {
         mode: 'edit',
