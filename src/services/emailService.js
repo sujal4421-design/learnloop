@@ -45,7 +45,7 @@ const EmailService = {
             <h2 style="color: #2F6F4E;">Good morning, ${user.name}! 👋</h2>
             <p>Here's what's due for revision today:</p>
             <ul>${listHtml}</ul>
-            <p><a href="http://localhost:3000/revisions" style="color: #2F6F4E; font-weight: 600;">Open LearnLoop →</a></p>
+            <p><a href="${process.env.APP_URL || 'http://localhost:3000'}/revisions" style="color: #2F6F4E; font-weight: 600;">Open LearnLoop →</a></p>
           </div>
         `
       });
