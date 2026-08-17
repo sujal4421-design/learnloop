@@ -1,6 +1,4 @@
 // src/services/logService.js
-// Business logic, including ownership enforcement — a user may only
-// view/edit/delete their OWN logs, verified here before the Model is touched.
 
 const LogModel = require('../models/logModel');
 const RevisionService = require('./revisionService');
@@ -14,36 +12,57 @@ function assertOwnership(log, userId) {
     throw err;
   }
   if (log.user_id !== userId) {
-    // Deliberately the same "not found" message as above — we don't want to
-    // reveal to an attacker that a log with this ID exists but belongs to
-    // someone else. Same pattern as the vague auth error messages in Phase 8.
     const err = new Error('Log not found.');
     err.status = 404;
     throw err;
   }
 }
 
+function validateLogInput({ title, description, category }) {
+  if (!title || !description || !category) {
+    return 'Title, description, and category are all required.';
+  }
+  if (title.trim().length === 0 || description.trim().length === 0 || category.trim().length === 0) {
+    return 'Fields cannot be empty or just spaces.';
+  }
+  if (title.trim().length > 150) {
+    return 'Title must be under 150 characters.';
+  }
+  if (category.trim().length > 50) {
+    return 'Category must be under 50 characters.';
+  }
+  if (description.trim().length > 2000) {
+    return 'Description must be under 2000 characters.';
+  }
+  return null;
+}
+
 const LogService = {
   async createLog(userId, { title, description, category }) {
-    if (!title || !description || !category) {
-      const err = new Error('Title, description, and category are all required.');
+    const validationError = validateLogInput({ title, description, category });
+    if (validationError) {
+      const err = new Error(validationError);
       err.status = 400;
       throw err;
     }
 
-    const logId = await LogModel.create({ userId, title, description, category });
+    const cleanTitle = title.trim();
+    const cleanDescription = description.trim();
+    const cleanCategory = category.trim();
+
+    const logId = await LogModel.create({
+      userId,
+      title: cleanTitle,
+      description: cleanDescription,
+      category: cleanCategory
+    });
 
     const newLog = await LogModel.findById(logId);
 
-    // Automatically schedule the 5 spaced revisions (Day 1/3/7/14/30)
-    // based on this log's date_learned.
     await RevisionService.scheduleForLog(logId, newLog.date_learned);
-
-    // Update the user's daily logging streak.
     await StreakService.recordActivity(userId);
 
-    // Generate a one-line AI summary (best-effort — never blocks log creation).
-    const aiSummary = await AIService.generateSummary(title, description);
+    const aiSummary = await AIService.generateSummary(cleanTitle, cleanDescription);
     if (aiSummary) {
       await LogModel.updateAiSummary(logId, aiSummary);
       newLog.ai_summary = aiSummary;
@@ -66,13 +85,18 @@ const LogService = {
     const log = await LogModel.findById(logId);
     assertOwnership(log, userId);
 
-    if (!title || !description || !category) {
-      const err = new Error('Title, description, and category are all required.');
+    const validationError = validateLogInput({ title, description, category });
+    if (validationError) {
+      const err = new Error(validationError);
       err.status = 400;
       throw err;
     }
 
-    await LogModel.update(logId, { title, description, category });
+    await LogModel.update(logId, {
+      title: title.trim(),
+      description: description.trim(),
+      category: category.trim()
+    });
     return LogModel.findById(logId);
   },
 

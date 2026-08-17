@@ -1,56 +1,89 @@
 // src/services/authService.js
-// The Service's job: business logic. The Controller calls THIS,
-// never the Model directly.
 
 const bcrypt = require('bcrypt');
 const UserModel = require('../models/userModel');
 const StreakModel = require('../models/streakModel');
 
-const SALT_ROUNDS = 10; // bcrypt's "cost factor" — higher = slower to compute = more secure, but slower logins. 10 is a solid default.
+const SALT_ROUNDS = 10;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateRegistrationInput({ name, email, password }) {
+  if (!name || !email || !password) {
+    return 'All fields are required.';
+  }
+  if (name.trim().length === 0) {
+    return 'Name cannot be empty or just spaces.';
+  }
+  if (name.trim().length > 100) {
+    // Matches users.name VARCHAR(100) — catch this here with a friendly
+    // message instead of letting MySQL throw a raw truncation error.
+    return 'Name must be under 100 characters.';
+  }
+  if (!EMAIL_REGEX.test(email.trim())) {
+    return 'Please enter a valid email address.';
+  }
+  if (email.trim().length > 150) {
+    return 'Email must be under 150 characters.';
+  }
+  if (password.length < 6) {
+    return 'Password must be at least 6 characters.';
+  }
+  return null; // no error
+}
 
 const AuthService = {
   async register({ name, email, password }) {
-    // Business rule: no two users can share an email.
-    const existing = await UserModel.findByEmail(email);
-    if (existing) {
-      const err = new Error('An account with this email already exists.');
-      err.status = 409; // HTTP 409 = Conflict
+    const validationError = validateRegistrationInput({ name, email, password });
+    if (validationError) {
+      const err = new Error(validationError);
+      err.status = 400;
       throw err;
     }
 
-    // Hash the password BEFORE it ever touches the database.
+    // Trim whitespace before storing — "  Sujal  " and "Sujal" should be
+    // treated as the same input, not stored with stray spaces.
+    const cleanName = name.trim();
+    const cleanEmail = email.trim().toLowerCase();
+
+    const existing = await UserModel.findByEmail(cleanEmail);
+    if (existing) {
+      const err = new Error('An account with this email already exists.');
+      err.status = 409;
+      throw err;
+    }
+
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+    const userId = await UserModel.create({ name: cleanName, email: cleanEmail, passwordHash });
 
-    const userId = await UserModel.create({ name, email, passwordHash });
-
-    // Every user needs exactly one streaks row (Phase — Streak System depends on this existing).
     await StreakModel.createForUser(userId);
 
-    return { id: userId, name, email };
+    return { id: userId, name: cleanName, email: cleanEmail };
   },
 
   async login({ email, password }) {
-    const user = await UserModel.findByEmail(email);
-    if (!user) {
-      const err = new Error('Invalid email or password.');
-      err.status = 401; // HTTP 401 = Unauthorized
+    if (!email || !password) {
+      const err = new Error('Email and password are required.');
+      err.status = 400;
       throw err;
     }
 
-    // Compare the submitted password against the stored hash.
-    // bcrypt.compare hashes the input internally and checks if it matches —
-    // we never decrypt the stored hash, because that's not possible.
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await UserModel.findByEmail(cleanEmail);
+
+    // Deliberately identical error for "no such user" and "wrong password" —
+    // prevents an attacker from discovering which emails are registered.
+    if (!user) {
+      const err = new Error('Invalid email or password.');
+      err.status = 401;
+      throw err;
+    }
+
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
       const err = new Error('Invalid email or password.');
       err.status = 401;
       throw err;
     }
-
-    // Deliberately vague error message on both "no such email" and "wrong password" —
-    // if we said "email not found" vs "wrong password" separately, an attacker could
-    // use that to discover which emails are registered. This is a real security pattern,
-    // not an accident.
 
     return { id: user.id, name: user.name, email: user.email };
   }

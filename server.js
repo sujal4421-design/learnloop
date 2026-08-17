@@ -9,6 +9,7 @@ const path = require('path');
 const pool = require('./src/config/db');
 const sessionMiddleware = require('./src/config/session');
 const { startDailyReminderJob } = require('./src/cron/dailyReminder');
+const { notFoundHandler, globalErrorHandler } = require('./src/middleware/errorHandler');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,9 +19,9 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // ---- Core middleware ----
-app.use(express.urlencoded({ extended: true })); // parse HTML form submissions
-app.use(express.json());                          // parse JSON request bodies
-app.use(express.static(path.join(__dirname, 'public'))); // serve CSS/JS/images
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(sessionMiddleware);
 
 // ---- Routes ----
@@ -29,7 +30,6 @@ app.use('/dashboard', require('./src/routes/dashboardRoutes'));
 app.use('/logs', require('./src/routes/logRoutes'));
 app.use('/revisions', require('./src/routes/revisionRoutes'));
 
-// Temporary health-check route — confirms the server + DB are alive.
 app.get('/health', async (req, res) => {
   try {
     await pool.query('SELECT 1');
@@ -43,9 +43,12 @@ app.get('/', (req, res) => {
   res.send('LearnLoop server is running. Visit /health to check the database connection.');
 });
 
+// ---- Error handling — MUST be registered after all real routes ----
+app.use(notFoundHandler);   // catches any URL that didn't match a route
+app.use(globalErrorHandler); // catches any error passed via next(err)
+
 // ---- Start server ----
 app.listen(PORT, () => {
   console.log(`LearnLoop server running at http://localhost:${PORT}`);
   startDailyReminderJob();
 });
-

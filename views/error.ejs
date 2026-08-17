@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= statusCode %> — LearnLoop</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; text-align:center;">
+    <div>
+      <div style="font-size:56px; font-weight:700; font-family:var(--font-display, serif); color:var(--primary, #2F6F4E); margin-bottom:8px;"><%= statusCode %></div>
+      <p style="color:var(--ink-muted, #62685F); font-size:15px; margin-bottom:24px;"><%= message %></p>
+      <a href="/dashboard" style="color:var(--primary, #2F6F4E); font-weight:600; text-decoration:none;">← Back to LearnLoop</a>
+    </div>
+  </div>
+</body>
+</html>
