@@ -1,15 +1,11 @@
 // src/services/aiService.js
 // Talks to Groq's API to generate a one-line summary of a learning log.
-// Deliberately isolated — knows nothing about logs, users, or the database.
-// Its only job: given some text, return a short summary (or null on failure).
 
 const Groq = require('groq-sdk');
 
 let groqClient = null;
 
 function getClient() {
-  // Created lazily, and only if a key is actually configured — this way
-  // the app doesn't crash on startup if GROQ_API_KEY is blank in .env.
   if (!process.env.GROQ_API_KEY) return null;
   if (!groqClient) {
     groqClient = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -27,7 +23,11 @@ const AIService = {
 
     try {
       const response = await client.chat.completions.create({
-        model: 'llama-3.1-8b-instant', // fast + cheap, ideal for a short one-line task
+        // Groq deprecated llama-3.1-8b-instant and llama-3.3-70b-versatile
+        // (retired 2026). openai/gpt-oss-20b is Groq's current recommended
+        // fast, low-cost general-purpose model — a direct replacement for
+        // this kind of short, simple generation task.
+        model: 'openai/gpt-oss-20b',
         messages: [
           {
             role: 'system',
@@ -45,7 +45,6 @@ const AIService = {
       const summary = response.choices[0]?.message?.content?.trim();
       return summary || null;
     } catch (err) {
-      // Never let an AI failure break log creation — log it and move on.
       console.error('Groq AI summary failed:', err.message);
       return null;
     }
