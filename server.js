@@ -12,6 +12,7 @@ const { startDailyReminderJob } = require('./src/cron/dailyReminder');
 const { notFoundHandler, globalErrorHandler } = require('./src/middleware/errorHandler');
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 
 // ---- View engine ----
